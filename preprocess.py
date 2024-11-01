@@ -17,7 +17,6 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 import torch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# BART 모델과 토크나이저 로드
 bart_model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn').to(device)
 bart_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
 
@@ -32,8 +31,6 @@ import numpy as np
 def process_in_chunks(df, chunk_size, output_file):
     chunks = np.array_split(df, np.ceil(len(df) / chunk_size))  # 데이터셋을 청크로 나눔
     for i, chunk in enumerate(chunks):
-        if i<286:
-            continue
         chunk['summary'] = chunk['txt'].apply(bart_summarize_text)
         chunk.to_csv(f'{output_file}train_part_{i}.csv', index=False)  # 각 청크를 파일로 저장
         print(f"{i} chunk completed")
