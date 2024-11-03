@@ -28,8 +28,8 @@ def preprocess(batch):
     batch['labels'] = targets['input_ids']
     return batch
 
-train_dataset = train_dataset.map(preprocess,batched=True)
-test_dataset = test_dataset.map(preprocess, batched=True)
+train_dataset = train_dataset.map(preprocess,batched=True,cache_file_name='/home/user3/workplace/dataset/cache/train_cache.arrow') #use cache file for fastter loading.
+test_dataset = test_dataset.map(preprocess, batched=True,cache_file_name='/home/user3/workplace/dataset/cache/test_cache.arrow')
 
 train_dataset.set_format(type='torch',columns=['input_ids','attention_mask','labels'])
 test_dataset.set_format(type='torch',columns=['input_ids','attention_mask','labels'])
@@ -38,11 +38,12 @@ training_args = TrainingArguments(
     output_dir=f"../results/{VERSION_NAME}",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
-    per_device_train_batch_size=2,
-    per_device_eval_batch_size=2,
+    per_device_train_batch_size=6, #need to use bigger batch size
+    per_device_eval_batch_size=6,
     num_train_epochs=3,
     weight_decay=0.01,
-    save_total_limit=3
+    save_total_limit=5,
+    fp16=True # mixed precision training? 3090 allow fp16
 )
 
 trainer = Trainer(
