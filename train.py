@@ -2,6 +2,8 @@ import torch
 from transformers import BartTokenizer, BartForConditionalGeneration, Trainer, TrainingArguments
 from datasets import Dataset,DatasetDict
 import pandas as pd
+VERSION_NAME = "M512"
+
 #Bart version.
 train_data = pd.read_csv('/home/user3/workplace/dataset/train/combined_train.csv')
 test_data = pd.read_csv('/home/user3/workplace/dataset/test/combined_test.csv')
@@ -20,7 +22,7 @@ model = BartForConditionalGeneration.from_pretrained(model_name)
 def preprocess(batch):
     input_text = [f"politeness: {p_tag} / email content:{summary}" for p_tag,summary in zip(batch['p_tag'],batch['summary'])] #fix! - not a single object. batch.
     inputs = tokenizer(input_text,max_length=512,truncation=True,padding="max_length",return_tensors="pt")
-    targets = tokenizer(batch['txt'],max_length=150,truncation=True,padding="max_length",return_tensors="pt")
+    targets = tokenizer(batch['txt'],max_length=512,truncation=True,padding="max_length",return_tensors="pt")
     batch['input_ids'] = inputs['input_ids']
     batch['attention_mask'] = inputs['attention_mask']
     batch['labels'] = targets['input_ids']
@@ -33,7 +35,7 @@ train_dataset.set_format(type='torch',columns=['input_ids','attention_mask','lab
 test_dataset.set_format(type='torch',columns=['input_ids','attention_mask','labels'])
 
 training_args = TrainingArguments(
-    output_dir="../results",
+    output_dir=f"../results/{VERSION_NAME}",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=2,
